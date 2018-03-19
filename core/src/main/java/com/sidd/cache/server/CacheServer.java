@@ -40,13 +40,15 @@ public class CacheServer implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(CacheServer.class);
 
-    public CacheServer()
+    private CacheServer(String propertiesFilePath)
     {
         try
         {
-            File f = new File("server.properties");
+            logger.info("properties file path: " + propertiesFilePath);
+            File f = new File(propertiesFilePath);
             Properties pros = new Properties();
             pros.load(new FileInputStream(f));
+            logger.info("properties file loaded from : " + f.getAbsolutePath());
             PORT = Integer.parseInt(pros.get("port").toString());
             cacheSize = Integer.parseInt(pros.get("cachesize").toString());
             dataTracking = new HashMap<SocketChannel, byte[]>();
@@ -219,7 +221,17 @@ public class CacheServer implements Runnable{
     }
     public static void main(String[] args)
     {
-        Thread server = new Thread(new CacheServer());
+        String filePath = "";
+        if(args.length == 1)
+        {
+            filePath = args[0];
+        }
+        else
+        {
+            filePath = "server.properties";
+        }
+
+        Thread server = new Thread(new CacheServer(filePath));
         server.start();
     }
 }
