@@ -1,8 +1,0 @@
-2018-03-19_11:36:30.906 [main] INFO  com.sidd.cache.server.CacheServer - server initialized
-2018-03-19_11:36:30.911 [main] INFO  com.sidd.cache.server.CacheServer - cache size 1000
-2018-03-19_11:37:39.890 [main] INFO  com.sidd.cache.server.CacheServer - server initialized. 127.0.0.1:8888
-2018-03-19_11:37:39.893 [main] INFO  com.sidd.cache.server.CacheServer - cache size 1000
-2018-03-19_11:38:25.097 [main] INFO  com.sidd.cache.server.CacheServer - 127.0.0.1:8888 started
-2018-03-19_11:38:25.100 [main] INFO  com.sidd.cache.server.CacheServer - cache size 1000
-2018-03-19_11:38:44.191 [main] INFO  com.sidd.cache.server.CacheServer - 127.0.0.1:8888 started
-2018-03-19_11:38:44.195 [main] INFO  com.sidd.cache.server.CacheServer - cache size 1000

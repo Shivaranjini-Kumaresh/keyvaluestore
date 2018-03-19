@@ -27,9 +27,10 @@ public class CacheServer implements Runnable{
     //TODO Read from a properties file
     public final static String ADDRESS = "127.0.0.1";
     public static int PORT = -1;
+    private int cacheSize = -1;
 
     public final static long TIMEOUT = 10000;
-    final int cacheSize = 1000;
+
     private ServerSocketChannel serverChannel;
     private Selector selector;
 
@@ -47,7 +48,7 @@ public class CacheServer implements Runnable{
             Properties pros = new Properties();
             pros.load(new FileInputStream(f));
             PORT = Integer.parseInt(pros.get("port").toString());
-
+            cacheSize = Integer.parseInt(pros.get("cachesize").toString());
             dataTracking = new HashMap<SocketChannel, byte[]>();
 
             init();
