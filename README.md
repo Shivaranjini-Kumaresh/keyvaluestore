@@ -17,23 +17,18 @@ Following messages are supported:
   
 
 # Starting the Server
-java com.sidd.cache.server.CacheServer  location Of server.properties file
-Example : java com.sidd.cache.server.CacheServer /Users/siddharth/Downloads/server.properties
+* java com.sidd.cache.server.CacheServer  <location Of server.properties file>
+* Example : java com.sidd.cache.server.CacheServer /Users/siddharth/Downloads/server.properties
+* The server starts at the given port as specified in server.properties file with the configured cache size
+   
+   ## Server.log output:
+   
+   2018-03-19_12:36:00.079 [main] INFO  com.sidd.cache.server.CacheServer - properties file path: server.properties
+   2018-03-19_12:36:00.082 [main] INFO  com.sidd.cache.server.CacheServer - properties file loaded from : /Users/sr250345/Documents/siddharth/personal/mygithub/keyvaluestore/server.properties
+  2018-03-19_12:36:00.105 [main] INFO  com.sidd.cache.server.CacheServer - 127.0.0.1:8888 started
+  2018-03-19_12:36:00.107 [main] INFO  com.sidd.cache.server.CacheServer - cache size 5000
 
-The server starts at the given port as specified in server.properties file with the configured cache size
 
 # Using the Java client for interacting with server
-   public class CacheServerTest 
-    public static void main(String[] args) throws IOException {
-        Cache cache = new Cache("127.0.0.1", 8888);
-        for(int c = 1; c <=20; c++)
-        {
-            cache.put(""+c, ""+c);
-            System.out.println(cache.get(""+c));
-        }
 
-        for(int c = 1; c <=5; c++)
-        {
-            System.out.println(cache.get(""+c));
-        }
-    }
+   
