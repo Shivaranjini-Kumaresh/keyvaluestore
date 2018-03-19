@@ -31,4 +31,6 @@ Following messages are supported:
 
 # Using the Java client for interacting with server
 
-   
+   * Cache cache = new Cache("127.0.0.1", 8888);
+   * cache.put("1", "one");
+   * System.out.println(cache.get("1"));
