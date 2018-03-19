@@ -2,7 +2,11 @@ package com.sidd.cache.server;
 
 import com.sidd.cache.core.CacheFactory;
 import com.sidd.cache.core.ICache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -13,6 +17,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by Siddharth on 3/17/18.
@@ -21,7 +26,8 @@ public class CacheServer implements Runnable{
 
     //TODO Read from a properties file
     public final static String ADDRESS = "127.0.0.1";
-    public final static int PORT = 8888;
+    public static int PORT = -1;
+
     public final static long TIMEOUT = 10000;
     final int cacheSize = 1000;
     private ServerSocketChannel serverChannel;
@@ -29,15 +35,30 @@ public class CacheServer implements Runnable{
 
     private Map<SocketChannel,byte[]> dataTracking;
 
-    ICache<String, String> cache = CacheFactory.newInstance(5);
+    ICache<String, String> cache;
+
+    private static final Logger logger = LoggerFactory.getLogger(CacheServer.class);
 
     public CacheServer()
     {
-        dataTracking = new HashMap<SocketChannel,byte[]>();
-        init();
+        try
+        {
+            File f = new File("server.properties");
+            Properties pros = new Properties();
+            pros.load(new FileInputStream(f));
+            PORT = Integer.parseInt(pros.get("port").toString());
 
-        //Initialize com.sidd.cache
-        cache = CacheFactory.newInstance(cacheSize);
+            dataTracking = new HashMap<SocketChannel, byte[]>();
+
+            init();
+
+            //Initialize
+            cache = CacheFactory.newInstance(cacheSize);
+            logger.info("cache size " + cacheSize);
+        }catch(Exception e)
+        {
+            logger.error("Error loading server.properties. " + e);
+        }
     }
     private void init()
     {
@@ -49,11 +70,11 @@ public class CacheServer implements Runnable{
             serverChannel.configureBlocking(false);//Make it non-blocking
             serverChannel.socket().bind(new InetSocketAddress(ADDRESS, PORT));
             serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-            System.out.println("server initialized...");
+            logger.info(ADDRESS+":"+PORT + " started");
 
         }catch(Exception e)
         {
-            e.printStackTrace();
+            logger.error("initialization failed", e);
         }
     }
     public void run()
@@ -76,14 +97,14 @@ public class CacheServer implements Runnable{
                     {
                         //Accepting connection
                         accept(key);
-                        System.out.println("Connection accepted...");
+                        logger.debug("Connection accepted");
                     }
                     if (key.isWritable()){
-                        //System.out.println("Writing...");
+                        logger.debug("Writing to socket");
                         write(key);
                     }
                     if (key.isReadable()){
-                        //System.out.println("Reading...");
+                        logger.debug("Reading from socket");
                         read(key);
                     }
                 }
@@ -92,22 +113,18 @@ public class CacheServer implements Runnable{
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
-        finally{
+        finally
+        {
             closeConnection();
         }
     }
-    private void accept(SelectionKey key) throws IOException{
+    private void accept(SelectionKey key) throws IOException
+    {
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
         SocketChannel socketChannel = serverSocketChannel.accept();
         socketChannel.configureBlocking(false);
-
-        /*socketChannel.register(selector, SelectionKey.OP_WRITE);
-        String msg = "You are connected to " + ADDRESS + ":" + PORT + "\n";
-        byte[] hello = new String(msg).getBytes();
-        dataTracking.put(socketChannel, hello);*/
-
         socketChannel.register(selector, SelectionKey.OP_READ);
     }
     private void read(SelectionKey key) throws IOException
@@ -122,7 +139,7 @@ public class CacheServer implements Runnable{
         }
         catch (IOException e)
         {
-            System.out.println("Reading problem, closing connection");
+            logger.error("Reading problem, closing connection", e);
             key.cancel();
             channel.close();
             return;
@@ -137,8 +154,6 @@ public class CacheServer implements Runnable{
         readBuffer.flip();
         byte[] data = new byte[1000];
         readBuffer.get(data, 0, read);
-
-
         process(key,data);
     }
     private void process(SelectionKey selectionKey, byte[] data)
@@ -146,6 +161,7 @@ public class CacheServer implements Runnable{
         String result = null;
 
         String dataStr = new String(data);
+        logger.info("process(). Message received: " + dataStr.trim());
         //PUT KEY VALUE , GET KEY
         String[] tokens = dataStr.split("\n");
         String operation = tokens[0];
@@ -156,7 +172,7 @@ public class CacheServer implements Runnable{
             String val = tokens[2].trim();
             cache.put(key, val);
             result = "OK" + "\n";
-            System.out.println("PUT " + key + "," + val + ", Result: " + result);
+            logger.info("PUT " + key + "," + val + ", Result: " + result);
         }
         else if("GET".equalsIgnoreCase(operation))
         {
@@ -170,13 +186,12 @@ public class CacheServer implements Runnable{
             {
                 result = "" +  "\n";//Returns an empty string if the key is not found
             }
-            System.out.println("GET " + key + ", Result: " + result);
+            logger.info("GET " + key + ", Result: " + result);
         }
         else
         {
             result = "Invalid command" + "\n";;
         }
-
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         dataTracking.put(socketChannel, result.getBytes());
         selectionKey.interestOps(SelectionKey.OP_WRITE);
@@ -190,7 +205,7 @@ public class CacheServer implements Runnable{
         key.interestOps(SelectionKey.OP_READ);
     }
     private void closeConnection(){
-        System.out.println("Shutting down");
+        logger.info("Shutting down");
         if (selector != null){
             try {
                 selector.close();
