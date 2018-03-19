@@ -1,18 +1,15 @@
 # Key-Value-Store
-This is a simple key value store server which exposes API for putting a key value and getting a value based on a key.It follows LRU algorithm for pruning the cache when the size goes beyond the desired cache size. This library can either be used an in-proc library or can also be started as a stand alone TCP server. There is a Java based client library also provided.
+This is a simple key value store server.It maintains a mapping, in memory, of keys to values.The server allows a maximum of N key-values to be in memory at any one time, as further entries are added, the oldest entries are evicted first(It follows LRU as its eviction strategy). The cache size is configurable.
+This store can either be used an in-proc java library or can also be started as a stand alone TCP server. There is a Java based client library that can be used to interact with the server remotely.
 This framework has got following components:
 * LRU Cache 
-* TCP Server exposing the cache service. The server is developed using Java NIO
-* A java based client library for interacting with TCP server
+* TCP Server exposing the remote service. The server is developed using Java NIO
+* A java based client for interacting with the TCP server
 
-# APIs exposed
-public interface ICache<K,V> {
-
-    public void put(K key, V val);
-
-    public Object get(K key);
-}
-
+# Operations exposed
+PUT <key> <value>
+GET <key>
+    
 # Network protocol
 Following messages are supported:
 * PUT\nKEY\nVALUE\n - Returns OK\n incase of success and FAIL\n incase of failure
