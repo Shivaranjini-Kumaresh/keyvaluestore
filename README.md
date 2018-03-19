@@ -7,8 +7,8 @@ This framework has got following components:
 * A java based client for interacting with the TCP server
 
 # Operations exposed
-PUT <key> <value>
-GET <key>
+* PUT key value
+* GET key
     
 # Network protocol
 Following messages are supported:
@@ -17,10 +17,13 @@ Following messages are supported:
   
 
 # Starting the Server
-java com.sidd.cache.server.CacheServer
+java com.sidd.cache.server.CacheServer  location Of server.properties file
+Example : java com.sidd.cache.server.CacheServer /Users/siddharth/Downloads/server.properties
+
 The server starts at the given port as specified in server.properties file with the configured cache size
 
-# Using the Java client for interacting with serverpublic class CacheServerTest 
+# Using the Java client for interacting with server
+   public class CacheServerTest 
     public static void main(String[] args) throws IOException {
         Cache cache = new Cache("127.0.0.1", 8888);
         for(int c = 1; c <=20; c++)
